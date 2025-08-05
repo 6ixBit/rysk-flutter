@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import '../scanner/document_scanner_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,17 +18,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _scanDocument() async {
     try {
-      final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        preferredCameraDevice: CameraDevice.rear,
+      final List<File>? scannedDocuments = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const DocumentScannerScreen()),
       );
 
-      if (photo != null) {
-        final File file = File(photo.path);
+      if (scannedDocuments != null && scannedDocuments.isNotEmpty) {
         setState(() {
-          _documents.add(file);
+          _documents.addAll(scannedDocuments);
         });
-        // TODO: Process the scanned document
+        // TODO: Upload documents to database
       }
     } catch (e) {
       _showErrorDialog('Failed to scan document');
