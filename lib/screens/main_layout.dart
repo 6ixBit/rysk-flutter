@@ -12,11 +12,11 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int _currentIndex = 0;
+  int _currentIndex = 1;
 
   final List<Widget> _screens = const [
-    HomeScreen(),
     DocumentsScreen(),
+    HomeScreen(),
     KnowledgeScreen(),
   ];
 

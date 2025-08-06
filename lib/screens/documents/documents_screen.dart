@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DocumentsScreen extends StatelessWidget {
   const DocumentsScreen({super.key});
@@ -8,9 +9,12 @@ class DocumentsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Padding(
+        title: Padding(
           padding: EdgeInsets.only(left: 16.0),
-          child: Text('Documents'),
+          child: Text(
+            'Documents',
+            style: GoogleFonts.inter(fontWeight: FontWeight.w700, fontSize: 20),
+          ),
         ),
       ),
       body: ListView.builder(

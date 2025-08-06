@@ -13,15 +13,16 @@ class BottomNav extends StatelessWidget {
       onDestinationSelected: onTap,
       destinations: const [
         NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        NavigationDestination(
           icon: Icon(Icons.folder_outlined),
           selectedIcon: Icon(Icons.folder),
           label: 'Documents',
         ),
+        NavigationDestination(
+          icon: Icon(Icons.home_outlined),
+          selectedIcon: Icon(Icons.home),
+          label: 'Home',
+        ),
+
         NavigationDestination(
           icon: Icon(Icons.lightbulb_outlined),
           selectedIcon: Icon(Icons.lightbulb),
