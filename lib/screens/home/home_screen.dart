@@ -240,6 +240,7 @@ class _ActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 150, // Increased height by 10px
       decoration: BoxDecoration(
         gradient: gradient,
         borderRadius: BorderRadius.circular(16),
@@ -259,7 +260,7 @@ class _ActionCard extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(24.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: 48, color: Colors.white),
                 const SizedBox(height: 16),
@@ -400,7 +401,7 @@ class _DocumentCard extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'Risk: ${document.analysis!.riskLevel} (${document.analysis!.overallRiskScore.toStringAsFixed(0)})',
+                            '${document.analysis!.riskLevel.substring(0, 1).toUpperCase()}${document.analysis!.riskLevel.substring(1).toLowerCase()} Risk',
                             style: GoogleFonts.inter(
                               color: _getRiskColor(
                                 document.analysis!.riskLevel,

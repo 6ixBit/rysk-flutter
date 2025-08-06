@@ -136,7 +136,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.8,
+                  childAspectRatio: 0.75, // Reduced to make cards taller
                 ),
                 itemCount: documents.length,
                 itemBuilder: (context, index) {
@@ -166,103 +166,141 @@ class _DocumentGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Document thumbnail
-            Expanded(
-              flex: 3,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Document thumbnail
+              Expanded(
+                flex: 3,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
                   ),
-                  border: Border.all(color: Colors.grey.shade300),
-                ),
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(12),
-                  ),
-                  child: document.images.isNotEmpty
-                      ? Image.file(document.images.first, fit: BoxFit.cover)
-                      : Container(
-                          color: Colors.grey.shade100,
-                          child: const Icon(
-                            Icons.description,
-                            size: 48,
-                            color: Colors.grey,
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: document.images.isNotEmpty
+                        ? Image.file(document.images.first, fit: BoxFit.cover)
+                        : Container(
+                            color: const Color(0xFFF9FAFB),
+                            child: const Icon(
+                              Icons.description_outlined,
+                              size: 48,
+                              color: Color(0xFF6B7280),
+                            ),
                           ),
-                        ),
+                  ),
                 ),
               ),
-            ),
 
-            // Document info
-            Expanded(
-              flex: 2,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      document.title,
-                      style: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+              // Document info
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Title
+                      Text(
+                        document.title,
+                        style: GoogleFonts.inter(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color: const Color(0xFF1F2937),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${document.images.length} page${document.images.length == 1 ? '' : 's'}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      '${document.uploadDate.day}/${document.uploadDate.month}/${document.uploadDate.year}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const Spacer(),
+                      const SizedBox(height: 8),
 
-                    // Risk badge
-                    if (document.analysis != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: getRiskColor(
-                            document.analysis!.riskLevel,
-                          ).withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: getRiskColor(document.analysis!.riskLevel),
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          '${document.analysis!.riskLevel} Risk',
-                          style: TextStyle(
-                            color: getRiskColor(document.analysis!.riskLevel),
-                            fontSize: 10,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      // Date
+                      Text(
+                        '${document.uploadDate.day}/${document.uploadDate.month}/${document.uploadDate.year}',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          color: const Color(0xFF6B7280),
                         ),
                       ),
-                  ],
+
+                      const Spacer(),
+
+                      // Bottom row: Risk badge (left) and Page count (right)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          // Risk badge (bottom left)
+                          if (document.analysis != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: getRiskColor(
+                                  document.analysis!.riskLevel,
+                                ).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: getRiskColor(
+                                    document.analysis!.riskLevel,
+                                  ),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Text(
+                                '${document.analysis!.riskLevel.substring(0, 1).toUpperCase()}${document.analysis!.riskLevel.substring(1).toLowerCase()} Risk',
+                                style: GoogleFonts.inter(
+                                  color: getRiskColor(
+                                    document.analysis!.riskLevel,
+                                  ),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+
+                          // Page count (bottom right)
+                          Text(
+                            '${document.images.length} page${document.images.length == 1 ? '' : 's'}',
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: const Color(0xFF6B7280),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
