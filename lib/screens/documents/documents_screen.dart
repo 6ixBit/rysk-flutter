@@ -80,15 +80,27 @@ class _DocumentsScreenState extends State<DocumentsScreen>
     print('📱 Documents screen building with ${documents.length} documents');
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
-        title: const Padding(
-          padding: EdgeInsets.only(left: 16.0),
-          child: Text('Documents'),
+        title: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Documents',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh, color: Color(0xFF6B7280)),
             onPressed: () {
               setState(() {});
             },
