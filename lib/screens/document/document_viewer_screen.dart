@@ -33,23 +33,23 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
   Color _getRiskColor(String riskLevel) {
     switch (riskLevel.toLowerCase()) {
       case 'low':
-        return Colors.green;
+        return const Color(0xFF10B981); // Success green from design system
       case 'medium':
-        return Colors.orange;
+        return const Color(0xFFF59E0B); // Warning orange from design system
       case 'high':
-        return Colors.red;
+        return const Color(0xFFEF4444); // Error red from design system
       case 'critical':
-        return Colors.purple;
+        return const Color(0xFF8B5CF6); // Purple from design system
       default:
-        return Colors.grey;
+        return const Color(0xFF6B7280); // Muted gray from design system
     }
   }
 
   Color _getClauseRiskColor(int riskLevel) {
-    if (riskLevel <= 3) return Colors.green;
-    if (riskLevel <= 6) return Colors.orange;
-    if (riskLevel <= 8) return Colors.red;
-    return Colors.purple;
+    if (riskLevel <= 3) return const Color(0xFF10B981); // Low - green
+    if (riskLevel <= 6) return const Color(0xFFF59E0B); // Medium - orange
+    if (riskLevel <= 8) return const Color(0xFFEF4444); // High - red
+    return const Color(0xFF8B5CF6); // Critical - purple
   }
 
   @override
@@ -62,14 +62,25 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
     final analysis = widget.document.analysis!;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Text(
           widget.document.title,
-          style: GoogleFonts.inter(fontWeight: FontWeight.w600),
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: const Color(0xFF1F2937),
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.share),
+            icon: const Icon(Icons.share_outlined, color: Color(0xFF6B7280)),
             onPressed: () {
               // TODO: Implement share functionality
             },
@@ -77,10 +88,22 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
         ],
         bottom: TabBar(
           controller: _tabController,
+          labelColor: const Color(0xFF3B82F6),
+          unselectedLabelColor: const Color(0xFF6B7280),
+          indicatorColor: const Color(0xFF3B82F6),
+          indicatorWeight: 3,
+          labelStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+          unselectedLabelStyle: GoogleFonts.inter(
+            fontWeight: FontWeight.w500,
+            fontSize: 14,
+          ),
           tabs: const [
-            Tab(icon: Icon(Icons.analytics), text: 'Analysis'),
-            Tab(icon: Icon(Icons.warning), text: 'Risk Clauses'),
-            Tab(icon: Icon(Icons.image), text: 'Document'),
+            Tab(icon: Icon(Icons.analytics_outlined), text: 'Analysis'),
+            Tab(icon: Icon(Icons.warning_outlined), text: 'Risk Clauses'),
+            Tab(icon: Icon(Icons.image_outlined), text: 'Document'),
           ],
         ),
       ),
@@ -97,22 +120,54 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
 
   Widget _buildProcessingScreen() {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.document.title)),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Color(0xFF1F2937)),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: Text(
+          widget.document.title,
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+            color: const Color(0xFF1F2937),
+          ),
+        ),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: const Color(0xFF3B82F6).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+              ),
+            ),
             const SizedBox(height: 24),
             Text(
-              _getStatusText(),
-              style: Theme.of(context).textTheme.titleLarge,
+              'Processing Document...',
+              style: GoogleFonts.inter(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF1F2937),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              _getStatusDescription(),
-              style: Theme.of(context).textTheme.bodyMedium,
-              textAlign: TextAlign.center,
+              'Analyzing for risks and clauses',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: const Color(0xFF6B7280),
+              ),
             ),
           ],
         ),
@@ -153,30 +208,43 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Risk Score Card
-          Card(
-            elevation: 4,
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
                   Text(
                     'Overall Risk Score',
                     style: GoogleFonts.inter(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1F2937),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Stack(
                     alignment: Alignment.center,
                     children: [
                       SizedBox(
-                        width: 120,
-                        height: 120,
+                        width: 140,
+                        height: 140,
                         child: CircularProgressIndicator(
                           value: analysis.overallRiskScore / 100,
                           strokeWidth: 12,
-                          backgroundColor: Colors.grey.shade200,
+                          backgroundColor: const Color(0xFFF3F4F6),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             _getRiskColor(analysis.riskLevel),
                           ),
@@ -187,27 +255,48 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
                           Text(
                             analysis.overallRiskScore.toStringAsFixed(0),
                             style: GoogleFonts.inter(
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 36,
+                              fontWeight: FontWeight.w700,
                               color: _getRiskColor(analysis.riskLevel),
                             ),
                           ),
-                          Text(
-                            analysis.riskLevel,
-                            style: GoogleFonts.inter(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: _getRiskColor(analysis.riskLevel),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getRiskColor(
+                                analysis.riskLevel,
+                              ).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: _getRiskColor(analysis.riskLevel),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              '${analysis.riskLevel.substring(0, 1).toUpperCase()}${analysis.riskLevel.substring(1).toLowerCase()} Risk',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: _getRiskColor(analysis.riskLevel),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
                   Text(
                     _getRiskDescription(analysis.riskLevel),
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: const Color(0xFF6B7280),
+                      height: 1.4,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -224,7 +313,8 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
                 child: _buildStatCard(
                   'Risk Clauses',
                   analysis.topRiskyClauses.length.toString(),
-                  Icons.warning,
+                  Icons.warning_outlined,
+                  const Color(0xFFF59E0B),
                 ),
               ),
               const SizedBox(width: 16),
@@ -232,41 +322,54 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
                 child: _buildStatCard(
                   'Pages',
                   analysis.metadata['pageCount']?.toString() ?? '0',
-                  Icons.description,
+                  Icons.description_outlined,
+                  const Color(0xFF3B82F6),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 32),
 
           // Document Info
           Text(
             'Document Details',
-            style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600),
+            style: GoogleFonts.inter(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF1F2937),
+            ),
           ),
-          const SizedBox(height: 12),
-          Card(
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+            ),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildDetailRow(
-                    'Type',
-                    analysis.metadata['documentType'] ?? 'Unknown',
-                  ),
-                  _buildDetailRow(
-                    'Upload Date',
+                    'Uploaded',
                     _formatDate(widget.document.uploadDate),
                   ),
+                  const Divider(color: Color(0xFFE5E7EB), height: 24),
                   _buildDetailRow(
-                    'Processing Time',
-                    analysis.metadata['processingTime'] ?? 'N/A',
+                    'Pages',
+                    widget.document.images.length.toString(),
                   ),
+                  const Divider(color: Color(0xFFE5E7EB), height: 24),
                   _buildDetailRow(
-                    'Confidence',
-                    '${((analysis.metadata['confidence'] ?? 0.0) * 100).toInt()}%',
+                    'File Type',
+                    analysis.metadata['fileType']?.toString() ?? 'PDF',
+                  ),
+                  const Divider(color: Color(0xFFE5E7EB), height: 24),
+                  _buildDetailRow(
+                    'Size',
+                    analysis.metadata['fileSize']?.toString() ?? 'Unknown',
                   ),
                 ],
               ),
@@ -278,90 +381,361 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
   }
 
   Widget _buildRiskClausesTab(DocumentAnalysis analysis) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: analysis.topRiskyClauses.length,
-      itemBuilder: (context, index) {
-        final clause = analysis.topRiskyClauses[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: ExpansionTile(
-            leading: Container(
-              width: 40,
-              height: 40,
+    if (analysis.topRiskyClauses.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
-                color: _getClauseRiskColor(clause.riskLevel),
-                shape: BoxShape.circle,
+                color: const Color(0xFF10B981).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
               ),
-              child: Center(
-                child: Text(
-                  clause.riskLevel.toString(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+              child: const Icon(
+                Icons.check_circle_outline,
+                size: 40,
+                color: Color(0xFF10B981),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Great News!',
+              style: GoogleFonts.inter(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1F2937),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No concerning clauses were found in this document',
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                color: const Color(0xFF6B7280),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header with count
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFEF3C7),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFF59E0B), width: 1),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF59E0B).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.warning_outlined,
+                    color: Color(0xFFF59E0B),
+                    size: 20,
                   ),
                 ),
-              ),
-            ),
-            title: Text(
-              clause.title,
-              style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-            ),
-            subtitle: Text(clause.description),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Clause Text:',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        clause.clause,
-                        style: GoogleFonts.inter(fontStyle: FontStyle.italic),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Why This is Risky:',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(clause.explanation),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Recommendations:',
-                      style: GoogleFonts.inter(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    ...clause.recommendations.map(
-                      (rec) => Padding(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('• '),
-                            Expanded(child: Text(rec)),
-                          ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${analysis.topRiskyClauses.length} Risk${analysis.topRiskyClauses.length == 1 ? '' : 's'} Found',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF1F2937),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          // Risk clauses list
+          ...analysis.topRiskyClauses.asMap().entries.map((entry) {
+            final index = entry.key;
+            final clause = entry.value;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Theme(
+                data: Theme.of(context).copyWith(
+                  dividerColor: Colors.transparent,
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
+                ),
+                child: ExpansionTile(
+                  tilePadding: const EdgeInsets.all(20),
+                  childrenPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: _getClauseRiskColor(
+                        clause.riskLevel,
+                      ).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _getClauseRiskColor(clause.riskLevel),
+                        width: 2,
+                      ),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${clause.riskLevel}/10',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: _getClauseRiskColor(clause.riskLevel),
+                        ),
+                      ),
+                    ),
+                  ),
+                  title: Text(
+                    clause.title,
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      clause.description,
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        color: const Color(0xFF6B7280),
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                  iconColor: const Color(0xFF6B7280),
+                  collapsedIconColor: const Color(0xFF6B7280),
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+
+                        // Clause text section
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF9FAFB),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFFE5E7EB),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.format_quote,
+                                    size: 16,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Exact Clause from Document',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF6B7280),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                clause.clause,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  fontStyle: FontStyle.italic,
+                                  color: const Color(0xFF374151),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Why this matters section
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: _getClauseRiskColor(
+                              clause.riskLevel,
+                            ).withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _getClauseRiskColor(
+                                clause.riskLevel,
+                              ).withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Icon(
+                                    Icons.lightbulb_outline,
+                                    size: 16,
+                                    color: _getClauseRiskColor(
+                                      clause.riskLevel,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Why This Matters to You',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: _getClauseRiskColor(
+                                        clause.riskLevel,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                clause.explanation,
+                                style: GoogleFonts.inter(
+                                  fontSize: 14,
+                                  color: const Color(0xFF374151),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        // Recommendations section
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: const Color(0xFF10B981).withOpacity(0.2),
+                              width: 1,
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.tips_and_updates_outlined,
+                                    size: 16,
+                                    color: Color(0xFF10B981),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'What You Can Do',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF10B981),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              ...clause.recommendations.map(
+                                (rec) => Padding(
+                                  padding: const EdgeInsets.only(bottom: 8),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        margin: const EdgeInsets.only(
+                                          top: 6,
+                                          right: 12,
+                                        ),
+                                        decoration: const BoxDecoration(
+                                          color: Color(0xFF10B981),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          rec,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 14,
+                                            color: const Color(0xFF374151),
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        );
-      },
+            );
+          }).toList(),
+        ],
+      ),
     );
   }
 
@@ -463,22 +837,57 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
     );
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon) {
-    return Card(
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color iconColor,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            Icon(icon, size: 32, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(height: 8),
+            Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, size: 24, color: iconColor),
+            ),
+            const SizedBox(height: 12),
             Text(
               value,
               style: GoogleFonts.inter(
                 fontSize: 24,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF1F2937),
               ),
             ),
-            Text(title, style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: GoogleFonts.inter(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: const Color(0xFF6B7280),
+              ),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
@@ -486,15 +895,26 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
   }
 
   Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: GoogleFonts.inter(fontWeight: FontWeight.w500)),
-          Text(value),
-        ],
-      ),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: const Color(0xFF6B7280),
+          ),
+        ),
+        Text(
+          value,
+          style: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF1F2937),
+          ),
+        ),
+      ],
     );
   }
 
