@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import '../scanner/document_scanner_screen.dart';
 import '../document/document_viewer_screen.dart';
 import '../../models/document.dart';
+import '../../services/local_document_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,7 +18,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _picker = ImagePicker();
-  List<File> _documents = [];
+  final LocalDocumentService _documentService = LocalDocumentService();
 
   Future<void> _scanDocument() async {
     try {
@@ -27,9 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (scannedDocuments != null && scannedDocuments.isNotEmpty) {
-        setState(() {
-          _documents.addAll(scannedDocuments);
-        });
+        _documentService.addMultipleDocuments(scannedDocuments);
+        setState(() {}); // Refresh UI
       }
     } catch (e) {
       _showErrorDialog('Failed to scan document');
@@ -42,95 +42,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (file != null) {
         final File document = File(file.path);
-        setState(() {
-          _documents.add(document);
-        });
+        _documentService.addDocument(document);
+        setState(() {}); // Refresh UI
       }
     } catch (e) {
       _showErrorDialog('Failed to upload document');
     }
   }
 
-  void _viewDocument(File documentFile) {
-    // Create a dummy document with analysis for viewing
-    final dummyDocument = Document(
-      id: 'doc_${DateTime.now().millisecondsSinceEpoch}',
-      title:
-          'Document ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-      images: [documentFile],
-      uploadDate: DateTime.now(),
-      status: DocumentStatus.completed,
-      analysis: _createDummyAnalysis(),
-    );
-
+  void _viewDocument(Document document) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => DocumentViewerScreen(document: dummyDocument),
+        builder: (context) => DocumentViewerScreen(document: document),
       ),
-    );
-  }
-
-  DocumentAnalysis _createDummyAnalysis() {
-    return DocumentAnalysis(
-      overallRiskScore: 67.0,
-      riskLevel: 'Medium',
-      topRiskyClauses: [
-        RiskyClause(
-          id: 'clause_1',
-          title: 'Unlimited Liability',
-          description:
-              'This clause exposes you to unlimited financial liability',
-          clause:
-              'Party A shall be liable for any and all damages, costs, and expenses arising from or related to this agreement, without limitation.',
-          riskLevel: 9,
-          explanation:
-              'This clause removes all caps on your potential liability, meaning you could be responsible for unlimited damages.',
-          recommendations: [
-            'Negotiate a liability cap',
-            'Add specific exceptions',
-            'Consider insurance requirements',
-          ],
-        ),
-        RiskyClause(
-          id: 'clause_2',
-          title: 'Broad Indemnification',
-          description: 'Excessive indemnification requirements',
-          clause:
-              'Party A agrees to indemnify and hold harmless Party B from any claims, damages, or losses.',
-          riskLevel: 7,
-          explanation:
-              'This broad indemnification clause could make you responsible for the other party\'s own negligence.',
-          recommendations: [
-            'Limit indemnification scope',
-            'Add mutual indemnification',
-            'Exclude gross negligence',
-          ],
-        ),
-      ],
-      extractedText: '''
-PROFESSIONAL SERVICES AGREEMENT
-
-This Professional Services Agreement ("Agreement") is entered into on [Date] between [Company A] and [Company B].
-
-1. SCOPE OF WORK
-The Contractor agrees to provide professional consulting services as detailed in Exhibit A.
-
-2. COMPENSATION
-Client shall pay Contractor a total fee of \$50,000 for the services described herein.
-
-3. LIABILITY
-Party A shall be liable for any and all damages, costs, and expenses arising from or related to this agreement, without limitation.
-
-4. INDEMNIFICATION
-Party A agrees to indemnify and hold harmless Party B from any claims, damages, or losses.
-      ''',
-      metadata: {
-        'documentType': 'Professional Services Agreement',
-        'pageCount': 1,
-        'processingTime': '2.1 seconds',
-        'confidence': 0.89,
-      },
     );
   }
 
@@ -152,6 +77,8 @@ Party A agrees to indemnify and hold harmless Party B from any claims, damages, 
 
   @override
   Widget build(BuildContext context) {
+    final documents = _documentService.documents;
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -162,7 +89,7 @@ Party A agrees to indemnify and hold harmless Party B from any claims, damages, 
             child: Text(
               'Rysk',
               style: GoogleFonts.inter(
-                fontWeight: FontWeight.w700, // Bold Inter font
+                fontWeight: FontWeight.w700,
                 fontSize: 20,
                 color: Colors.black,
               ),
@@ -209,7 +136,7 @@ Party A agrees to indemnify and hold harmless Party B from any claims, damages, 
 
           // Recent Documents
           Expanded(
-            child: _documents.isEmpty
+            child: documents.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -236,67 +163,12 @@ Party A agrees to indemnify and hold harmless Party B from any claims, damages, 
                   )
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
-                    itemCount: _documents.length,
+                    itemCount: documents.length,
                     itemBuilder: (context, index) {
-                      final document = _documents[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 16),
-                        child: ListTile(
-                          leading: Container(
-                            width: 50,
-                            height: 70,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.grey.shade300),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(document, fit: BoxFit.cover),
-                            ),
-                          ),
-                          title: Text(
-                            path.basename(document.path),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Added ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                              const SizedBox(height: 4),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.green.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.green,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Ready to view',
-                                  style: TextStyle(
-                                    color: Colors.green,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: const Icon(Icons.chevron_right),
-                          onTap: () => _viewDocument(document),
-                        ),
+                      final document = documents[index];
+                      return _DocumentCard(
+                        document: document,
+                        onTap: () => _viewDocument(document),
                       );
                     },
                   ),
@@ -341,6 +213,120 @@ class _ActionCard extends StatelessWidget {
                 style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DocumentCard extends StatelessWidget {
+  final Document document;
+  final VoidCallback onTap;
+
+  const _DocumentCard({required this.document, required this.onTap});
+
+  Color _getRiskColor(String riskLevel) {
+    switch (riskLevel.toLowerCase()) {
+      case 'low':
+        return Colors.green;
+      case 'medium':
+        return Colors.orange;
+      case 'high':
+        return Colors.red;
+      case 'critical':
+        return Colors.purple;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Document thumbnail
+              Container(
+                width: 60,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: document.images.isNotEmpty
+                      ? Image.file(document.images.first, fit: BoxFit.cover)
+                      : const Icon(Icons.description),
+                ),
+              ),
+              const SizedBox(width: 16),
+
+              // Document details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      document.title,
+                      style: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${document.images.length} page${document.images.length == 1 ? '' : 's'}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${document.uploadDate.day}/${document.uploadDate.month}/${document.uploadDate.year}',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Risk score
+                    if (document.analysis != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getRiskColor(
+                            document.analysis!.riskLevel,
+                          ).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _getRiskColor(document.analysis!.riskLevel),
+                            width: 1,
+                          ),
+                        ),
+                        child: Text(
+                          'Risk: ${document.analysis!.riskLevel} (${document.analysis!.overallRiskScore.toStringAsFixed(0)})',
+                          style: TextStyle(
+                            color: _getRiskColor(document.analysis!.riskLevel),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+
+              const Icon(Icons.chevron_right),
             ],
           ),
         ),
