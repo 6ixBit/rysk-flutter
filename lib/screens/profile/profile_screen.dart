@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'legal_document_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -112,61 +113,18 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Account Section
-                  _buildSectionHeader('Account'),
-                  const SizedBox(height: 12),
-
-                  _ProfileOption(
-                    icon: Icons.person_outline,
-                    iconColor: const Color(0xFF3B82F6),
-                    title: 'Edit Profile',
-                    subtitle: 'Update your personal information',
-                    onTap: () {
-                      // TODO: Navigate to edit profile
-                      _showComingSoonDialog(context, 'Edit Profile');
-                    },
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  _ProfileOption(
-                    icon: Icons.security_outlined,
-                    iconColor: const Color(0xFF10B981),
-                    title: 'Privacy & Security',
-                    subtitle: 'Manage your privacy settings',
-                    onTap: () {
-                      // TODO: Navigate to privacy settings
-                      _showComingSoonDialog(context, 'Privacy & Security');
-                    },
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  _ProfileOption(
-                    icon: Icons.notifications_outlined,
-                    iconColor: const Color(0xFFF59E0B),
-                    title: 'Notifications',
-                    subtitle: 'Configure notification preferences',
-                    onTap: () {
-                      // TODO: Navigate to notification settings
-                      _showComingSoonDialog(context, 'Notifications');
-                    },
-                  ),
-
-                  const SizedBox(height: 32),
-
                   // Support Section
                   _buildSectionHeader('Support'),
                   const SizedBox(height: 12),
 
                   _ProfileOption(
                     icon: Icons.help_outline,
-                    iconColor: const Color(0xFF8B5CF6),
+                    iconColor: const Color(0xFF10B981),
                     title: 'Help & Support',
-                    subtitle: 'Get help and contact support',
+                    subtitle: 'Get help with using Rysk',
                     onTap: () {
-                      // TODO: Navigate to help
-                      _showComingSoonDialog(context, 'Help & Support');
+                      // TODO: Navigate to help center
+                      _showComingSoonDialog(context);
                     },
                   ),
 
@@ -174,31 +132,116 @@ class ProfileScreen extends StatelessWidget {
 
                   _ProfileOption(
                     icon: Icons.feedback_outlined,
-                    iconColor: const Color(0xFF06B6D4),
+                    iconColor: const Color(0xFFF59E0B),
                     title: 'Send Feedback',
-                    subtitle: 'Help us improve the app',
+                    subtitle: 'Help us improve Rysk',
                     onTap: () {
-                      // TODO: Navigate to feedback
-                      _showComingSoonDialog(context, 'Send Feedback');
+                      // TODO: Open feedback form
+                      _showComingSoonDialog(context);
+                    },
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // Legal Section
+                  _buildSectionHeader('Legal'),
+                  const SizedBox(height: 12),
+
+                  _ProfileOption(
+                    icon: Icons.description_outlined,
+                    iconColor: const Color(0xFF3B82F6),
+                    title: 'Terms of Service',
+                    subtitle: 'Terms and conditions of use',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LegalDocumentScreen(
+                            title: 'Terms of Service',
+                            documentType: LegalDocumentType.terms,
+                          ),
+                        ),
+                      );
                     },
                   ),
 
                   const SizedBox(height: 8),
 
                   _ProfileOption(
-                    icon: Icons.info_outline,
-                    iconColor: const Color(0xFF6B7280),
-                    title: 'About',
-                    subtitle: 'Version 1.0.0',
+                    icon: Icons.privacy_tip_outlined,
+                    iconColor: const Color(0xFF10B981),
+                    title: 'Privacy Policy',
+                    subtitle: 'How we handle your data',
                     onTap: () {
-                      // TODO: Show about dialog
-                      _showAboutDialog(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LegalDocumentScreen(
+                            title: 'Privacy Policy',
+                            documentType: LegalDocumentType.privacy,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  _ProfileOption(
+                    icon: Icons.cookie_outlined,
+                    iconColor: const Color(0xFFF59E0B),
+                    title: 'Cookie Policy',
+                    subtitle: 'How we use cookies',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LegalDocumentScreen(
+                            title: 'Cookie Policy',
+                            documentType: LegalDocumentType.cookies,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  _ProfileOption(
+                    icon: Icons.data_usage_outlined,
+                    iconColor: const Color(0xFF8B5CF6),
+                    title: 'Data Usage',
+                    subtitle: 'How your data is processed',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LegalDocumentScreen(
+                            title: 'Data Usage',
+                            documentType: LegalDocumentType.dataUsage,
+                          ),
+                        ),
+                      );
                     },
                   ),
 
                   const SizedBox(height: 32),
 
-                  // Logout Button
+                  // Version info
+                  Center(
+                    child: Text(
+                      'Version 1.0.0',
+                      style: GoogleFonts.inter(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: const Color(0xFF9CA3AF),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // Sign Out Button
                   Container(
                     width: double.infinity,
                     height: 56,
@@ -304,7 +347,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showComingSoonDialog(BuildContext context, String feature) {
+  void _showComingSoonDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -318,55 +361,8 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          '$feature is coming in a future update.',
+          'This feature is coming in a future update.',
           style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'OK',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF3B82F6),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(
-          'About Rysk',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1F2937),
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Version 1.0.0',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF6B7280),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Rysk helps you analyze contracts and understand potential risks in plain language.',
-              style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
-            ),
-          ],
         ),
         actions: [
           TextButton(
@@ -448,7 +444,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ),
         content: Text(
-          'This action cannot be undone. All your data will be permanently deleted.',
+          'Are you sure you want to delete your account? This action cannot be undone.',
           style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
         ),
         actions: [
@@ -456,21 +452,18 @@ class ProfileScreen extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: Text(
               'Cancel',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF6B7280),
-              ),
+              style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
             ),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(context);
               // TODO: Implement account deletion
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Account deletion will be implemented soon',
-                    style: GoogleFonts.inter(),
+                    'Account deletion feature coming soon',
+                    style: GoogleFonts.inter(color: Colors.white),
                   ),
                   backgroundColor: const Color(0xFFEF4444),
                 ),
@@ -478,10 +471,7 @@ class ProfileScreen extends StatelessWidget {
             },
             child: Text(
               'Delete',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFFEF4444),
-              ),
+              style: GoogleFonts.inter(color: const Color(0xFFEF4444)),
             ),
           ),
         ],
