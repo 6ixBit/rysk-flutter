@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../scanner/document_scanner_screen.dart';
@@ -38,10 +39,168 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _uploadDocument() async {
     try {
-      final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
+      // Show action sheet to let user choose source
+      final result = await showModalBottomSheet<String>(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle bar
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE5E7EB),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 24),
 
-      if (file != null) {
-        final File document = File(file.path);
+                // Title
+                Text(
+                  'Choose Source',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1F2937),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Photo Library Option
+                ListTile(
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3B82F6).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.photo_library_outlined,
+                      color: Color(0xFF3B82F6),
+                      size: 24,
+                    ),
+                  ),
+                  title: Text(
+                    'Photo Library',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Choose from your photos',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(context, 'photos'),
+                ),
+
+                // Files Option
+                ListTile(
+                  leading: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.folder_outlined,
+                      color: Color(0xFF10B981),
+                      size: 24,
+                    ),
+                  ),
+                  title: Text(
+                    'Files',
+                    style: GoogleFonts.inter(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF1F2937),
+                    ),
+                  ),
+                  subtitle: Text(
+                    'Browse documents and files',
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
+                  onTap: () => Navigator.pop(context, 'files'),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Cancel Button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFFF3F4F6),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Cancel',
+                        style: GoogleFonts.inter(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: const Color(0xFF6B7280),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      if (result == null) return;
+
+      File? document;
+
+      if (result == 'photos') {
+        // Use photo library
+        final XFile? file = await _picker.pickImage(
+          source: ImageSource.gallery,
+        );
+        if (file != null) {
+          document = File(file.path);
+        }
+      } else if (result == 'files') {
+        // Use file picker for documents
+        final result = await FilePicker.platform.pickFiles(
+          type: FileType.any,
+          allowMultiple: false,
+        );
+
+        if (result != null && result.files.isNotEmpty) {
+          document = File(result.files.first.path!);
+        }
+      }
+
+      if (document != null) {
         _documentService.addDocument(document);
         setState(() {}); // Refresh UI
       }
