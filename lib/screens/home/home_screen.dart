@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 import '../scanner/document_scanner_screen.dart';
 import '../document/document_viewer_screen.dart';
+import '../profile/profile_screen.dart';
 import '../../models/document.dart';
 import '../../services/local_document_service.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -263,7 +264,12 @@ class _HomeScreenState extends State<HomeScreen> {
             child: IconButton(
               icon: const Icon(Icons.person, color: Color(0xFF6B7280)),
               onPressed: () {
-                // TODO: Navigate to profile
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
               },
             ),
           ),
