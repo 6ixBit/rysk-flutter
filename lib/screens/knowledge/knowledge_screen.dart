@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'knowledge_article_screen.dart';
 
 class KnowledgeScreen extends StatelessWidget {
   const KnowledgeScreen({super.key});
@@ -36,7 +37,17 @@ class KnowledgeScreen extends StatelessWidget {
             icon: Icons.description_outlined,
             iconColor: const Color(0xFF3B82F6),
             onTap: () {
-              // TODO: Navigate to contract basics
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KnowledgeArticleScreen(
+                    articleId: 'contract-basics',
+                    title: 'Contract Basics',
+                    iconColor: Color(0xFF3B82F6),
+                    icon: Icons.description_outlined,
+                  ),
+                ),
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -47,7 +58,17 @@ class KnowledgeScreen extends StatelessWidget {
             icon: Icons.security_outlined,
             iconColor: const Color(0xFFF59E0B),
             onTap: () {
-              // TODO: Navigate to risk assessment
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KnowledgeArticleScreen(
+                    articleId: 'risk-assessment',
+                    title: 'Risk Assessment',
+                    iconColor: Color(0xFFF59E0B),
+                    icon: Icons.security_outlined,
+                  ),
+                ),
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -58,7 +79,17 @@ class KnowledgeScreen extends StatelessWidget {
             icon: Icons.menu_book_outlined,
             iconColor: const Color(0xFF10B981),
             onTap: () {
-              // TODO: Navigate to legal terms
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KnowledgeArticleScreen(
+                    articleId: 'legal-terms',
+                    title: 'Legal Terms Dictionary',
+                    iconColor: Color(0xFF10B981),
+                    icon: Icons.menu_book_outlined,
+                  ),
+                ),
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -68,7 +99,17 @@ class KnowledgeScreen extends StatelessWidget {
             icon: Icons.warning_outlined,
             iconColor: const Color(0xFFEF4444),
             onTap: () {
-              // TODO: Navigate to red flags
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KnowledgeArticleScreen(
+                    articleId: 'red-flags',
+                    title: 'Red Flags to Watch',
+                    iconColor: Color(0xFFEF4444),
+                    icon: Icons.warning_outlined,
+                  ),
+                ),
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -79,7 +120,17 @@ class KnowledgeScreen extends StatelessWidget {
             icon: Icons.handshake_outlined,
             iconColor: const Color(0xFF8B5CF6),
             onTap: () {
-              // TODO: Navigate to negotiation tips
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KnowledgeArticleScreen(
+                    articleId: 'negotiation-tips',
+                    title: 'Negotiation Tips',
+                    iconColor: Color(0xFF8B5CF6),
+                    icon: Icons.handshake_outlined,
+                  ),
+                ),
+              );
             },
           ),
           const SizedBox(height: 16),
@@ -90,7 +141,17 @@ class KnowledgeScreen extends StatelessWidget {
             icon: Icons.business_center_outlined,
             iconColor: const Color(0xFF06B6D4),
             onTap: () {
-              // TODO: Navigate to industry standards
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const KnowledgeArticleScreen(
+                    articleId: 'industry-standards',
+                    title: 'Industry Standards',
+                    iconColor: Color(0xFF06B6D4),
+                    icon: Icons.business_center_outlined,
+                  ),
+                ),
+              );
             },
           ),
         ],
