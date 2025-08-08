@@ -18,6 +18,7 @@ class KnowledgeArticleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final article = _getArticleContent(articleId);
+    final dynamicMinutes = _estimateReadingMinutes(article);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -103,7 +104,7 @@ class KnowledgeArticleScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${article.readingTime} min read',
+                      '$dynamicMinutes min read',
                       style: GoogleFonts.inter(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
@@ -218,6 +219,20 @@ class KnowledgeArticleScreen extends StatelessWidget {
         const SizedBox(height: 32),
       ],
     );
+  }
+
+  int _estimateReadingMinutes(ArticleData article) {
+    final buffer = StringBuffer();
+    for (final section in article.sections) {
+      for (final content in section.content) {
+        buffer.write('${content.text} ');
+      }
+    }
+    final text = buffer.toString().trim();
+    if (text.isEmpty) return article.readingTime;
+    final wordCount = RegExp(r'\w+').allMatches(text).length;
+    final minutes = (wordCount / 200).ceil();
+    return minutes < 1 ? 1 : minutes;
   }
 
   ArticleData _getArticleContent(String articleId) {
@@ -375,6 +390,353 @@ class KnowledgeArticleScreen extends StatelessWidget {
                 ArticleContent(
                   type: ContentType.bulletPoint,
                   text: 'Governing Law - Which state/country\'s laws apply',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Assignment - Who can transfer the contract to someone else',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Severability - If one clause is invalid, the rest still apply',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Entire Agreement - This document overrides previous discussions',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Notice - How official communications must be sent (email/mail)',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Waiver - Not enforcing a right once doesn\'t waive it forever',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Confidentiality - What information must be kept private',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Term & Termination - How long it lasts and how it can end',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Non‑compete / Non‑solicit - Limits on competing or hiring (varies by region)',
+                ),
+              ],
+            ),
+          ],
+        );
+
+      case 'red-flags':
+        return ArticleData(
+          subtitle: 'Common problematic clauses and how to spot them fast',
+          readingTime: 6,
+          sections: [
+            ArticleSection(
+              title: 'Top Red Flags',
+              content: [
+                ArticleContent(
+                  type: ContentType.paragraph,
+                  text:
+                      'These clauses can expose you to unnecessary risk or lock you into unfair terms. If you see these, pause and review carefully:',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Unlimited Liability — No cap on the amount you can be held responsible for',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Broad Indemnification — You\'re covering losses beyond your control (including the other party\'s mistakes)',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Automatic Renewal without Notice — Contract renews by default and is easy to miss',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'One-sided Termination — They can end it anytime; you can\'t',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'IP Assignment (Too Broad) — Transfers all your work and related know‑how with no carve‑outs',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Jurisdiction/Venue Far Away — Forces disputes in an inconvenient or expensive location',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Confidentiality with Carve‑outs Missing — No protection for your trade secrets if they leak via third parties',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Payment Terms with Long Delays — Cash flow risk (e.g., Net 60/90) without late fees',
+                ),
+                ArticleContent(
+                  type: ContentType.highlight,
+                  text:
+                      'Quick check: Is it balanced? If every obligation is on you and every right is on them, negotiate.',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'What to do if you spot a red flag',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Ask for limits — Add a reasonable liability cap (e.g., 12 months of fees) and exclude indirect damages',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Balance obligations — Make indemnities mutual or narrow them to your own actions only',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Add notice — Require reminder emails before auto-renew; allow termination for convenience with short notice',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Carve out your IP — Keep pre‑existing IP and general know‑how; define ownership of deliverables clearly',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Choose neutral forum — Use your home state/country or neutral arbitration',
+                ),
+              ],
+            ),
+          ],
+        );
+
+      case 'negotiation-tips':
+        return ArticleData(
+          subtitle: 'Practical steps to get fairer, safer contract terms',
+          readingTime: 6,
+          sections: [
+            ArticleSection(
+              title: 'Before you negotiate',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Prioritize must‑haves vs nice‑to‑haves — Focus on risk, cost, and lock‑in first',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Know your fallback — Decide in advance when you\'d walk away',
+                ),
+                ArticleContent(
+                  type: ContentType.highlight,
+                  text:
+                      'Bring examples — Propose specific alternative wording. It\'s easier to accept than to draft from scratch.',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'During negotiation',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Trade, don\'t concede — If you give on price, get better payment terms or a liability cap in return',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Be specific — Replace vague terms with concrete numbers (e.g., \"99.9% uptime\", \"30‑day notice\")',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Time‑box renewals — Shorter initial terms and renewal windows reduce lock‑in risk',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Escalate politely — If stuck, bring in someone senior or switch to written comments to reduce friction',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'After agreement',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Save the final PDF and a summary of key terms (fees, term, renewals, caps)',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Calendar reminders — Add renewal and notice dates so you don\'t miss them',
+                ),
+              ],
+            ),
+          ],
+        );
+
+      case 'industry-standards':
+        return ArticleData(
+          subtitle:
+              'Typical terms you\'ll see by contract type (not legal advice)',
+          readingTime: 7,
+          sections: [
+            ArticleSection(
+              title: 'SaaS Agreements (typical ranges)',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Liability cap — 6–12 months of fees; often excludes indirect damages',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Uptime/SLA — 99.9% is common; credits for extended downtime',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Auto‑renewal — 12‑month terms; 30‑60 day notice to cancel',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Data protection — DPA + sub‑processors listed; security commitments defined',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'Professional Services / Consulting',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Deliverables & acceptance — Clear milestones and sign‑off criteria',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'IP ownership — Often client‑owned deliverables; vendor keeps pre‑existing IP',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Expenses — Pre‑approval for travel; invoicing cycles 30 days typical',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'NDAs (Confidentiality)',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Mutual NDAs are common — Both sides owe the same duties',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Term — 1–3 years for confidentiality; carve‑outs for public/independently developed info',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text: 'Return/Destroy — On request or at project end',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'Residential Leases (Rentals)',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Security deposit — Often 1–2 months\' rent; check refund conditions and timeline',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Notice to end lease — 30 days typical for month‑to‑month; fixed terms specify end date',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Maintenance — Who fixes what (landlord vs tenant responsibilities)',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Late fees — Caps or grace periods may apply (varies by location)',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text: 'Pets — Deposits/fees, breed restrictions, and damages',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Early termination — Fees or subletting rules if you need to leave early',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'HOA (Homeowners Association) Agreements',
+              content: [
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text: 'Assessments/dues — Amount, due dates, late penalties',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Rules — Noise, parking, exterior changes, short‑term rentals',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Architectural approvals — Process and timelines for modifications',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Fines & enforcement — How violations are handled; appeal options',
+                ),
+                ArticleContent(
+                  type: ContentType.bulletPoint,
+                  text:
+                      'Common areas — Responsibilities, hours, guest policies',
+                ),
+              ],
+            ),
+            ArticleSection(
+              title: 'Keep in mind',
+              content: [
+                ArticleContent(
+                  type: ContentType.highlight,
+                  text:
+                      'These are typical patterns, not rules. Always consider your context and, if needed, get legal advice.',
                 ),
               ],
             ),
