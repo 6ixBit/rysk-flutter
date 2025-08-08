@@ -8,7 +8,8 @@ import '../scanner/document_scanner_screen.dart';
 import '../document/document_viewer_screen.dart';
 import '../profile/profile_screen.dart';
 import '../../models/document.dart';
-import '../../services/local_document_service.dart';
+// import '../../services/local_document_service.dart';
+import '../../services/supabase_document_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,7 +21,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final ImagePicker _picker = ImagePicker();
-  final LocalDocumentService _documentService = LocalDocumentService();
+  // final LocalDocumentService _documentService = LocalDocumentService();
+  final SupabaseDocumentService _supabaseService = SupabaseDocumentService();
+  List<Document> _remoteDocuments = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRemoteDocuments();
+  }
+
+  Future<void> _loadRemoteDocuments() async {
+    try {
+      final docs = await _supabaseService.fetchDocuments(limit: 10);
+      if (mounted) {
+        setState(() {
+          _remoteDocuments = docs;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
 
   Future<void> _scanDocument() async {
     try {
@@ -30,8 +54,32 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (scannedDocuments != null && scannedDocuments.isNotEmpty) {
-        _documentService.addMultipleDocuments(scannedDocuments);
-        setState(() {}); // Refresh UI
+        // Create document
+        final docId = await _supabaseService.createDocument(
+          title:
+              'Scanned ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+          pageCount: scannedDocuments.length,
+        );
+
+        // Upload images
+        await _supabaseService.uploadImagesAndInsert(
+          documentId: docId,
+          files: scannedDocuments,
+        );
+
+        // Navigate to viewer in processing state (analysis pending)
+        final doc = await _supabaseService.getDocumentById(docId);
+        if (!mounted) return;
+        if (doc != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DocumentViewerScreen(document: doc),
+            ),
+          );
+        }
+
+        await _loadRemoteDocuments();
       }
     } catch (e) {
       _showErrorDialog('Failed to scan document');
@@ -182,7 +230,6 @@ class _HomeScreenState extends State<HomeScreen> {
       File? document;
 
       if (result == 'photos') {
-        // Use photo library
         final XFile? file = await _picker.pickImage(
           source: ImageSource.gallery,
         );
@@ -190,20 +237,42 @@ class _HomeScreenState extends State<HomeScreen> {
           document = File(file.path);
         }
       } else if (result == 'files') {
-        // Use file picker for documents
         final result = await FilePicker.platform.pickFiles(
           type: FileType.any,
           allowMultiple: false,
         );
-
         if (result != null && result.files.isNotEmpty) {
           document = File(result.files.first.path!);
         }
       }
 
       if (document != null) {
-        _documentService.addDocument(document);
-        setState(() {}); // Refresh UI
+        // Create document
+        final docId = await _supabaseService.createDocument(
+          title: path.basename(document.path),
+          pageCount: 1,
+          fileSizeBytes: await document.length(),
+        );
+
+        // Upload single image/file (treat as page 1 image if image)
+        await _supabaseService.uploadImagesAndInsert(
+          documentId: docId,
+          files: [document],
+        );
+
+        // Navigate to viewer (processing state)
+        final doc = await _supabaseService.getDocumentById(docId);
+        if (!mounted) return;
+        if (doc != null) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DocumentViewerScreen(document: doc),
+            ),
+          );
+        }
+
+        await _loadRemoteDocuments();
       }
     } catch (e) {
       _showErrorDialog('Failed to upload document');
@@ -237,7 +306,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final documents = _documentService.documents;
+    final documents = _remoteDocuments;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -328,7 +397,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
           // Recent Documents
           Expanded(
-            child: documents.isEmpty
+            child: _loading
+                ? const Center(child: CircularProgressIndicator())
+                : documents.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -503,7 +574,12 @@ class _DocumentCard extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: document.images.isNotEmpty
+                    child: document.imageUrls.isNotEmpty
+                        ? Image.network(
+                            document.imageUrls.first,
+                            fit: BoxFit.cover,
+                          )
+                        : document.images.isNotEmpty
                         ? Image.file(document.images.first, fit: BoxFit.cover)
                         : const Icon(
                             Icons.description,
@@ -530,7 +606,7 @@ class _DocumentCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${document.images.length} page${document.images.length == 1 ? '' : 's'}',
+                        '${(document.imageUrls.isNotEmpty ? document.imageUrls.length : document.images.length)} page${(document.imageUrls.isNotEmpty ? document.imageUrls.length : document.images.length) == 1 ? '' : 's'}',
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: const Color(0xFF6B7280),

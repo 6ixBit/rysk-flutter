@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../models/document.dart';
-import '../../services/local_document_service.dart';
+// import '../../services/local_document_service.dart';
+import '../../services/supabase_document_service.dart';
 import '../document/document_viewer_screen.dart';
 
 class DocumentsScreen extends StatefulWidget {
@@ -13,7 +14,9 @@ class DocumentsScreen extends StatefulWidget {
 
 class _DocumentsScreenState extends State<DocumentsScreen>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
-  final LocalDocumentService _documentService = LocalDocumentService();
+  final SupabaseDocumentService _supabaseService = SupabaseDocumentService();
+  List<Document> _remoteDocuments = [];
+  bool _loading = true;
 
   @override
   bool get wantKeepAlive => true;
@@ -22,10 +25,24 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Refresh when the screen is first built
+    _loadRemoteDocuments();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() {});
     });
+  }
+
+  Future<void> _loadRemoteDocuments() async {
+    try {
+      final docs = await _supabaseService.fetchDocuments(limit: 50);
+      if (mounted) {
+        setState(() {
+          _remoteDocuments = docs;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   @override
@@ -37,14 +54,14 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
-      setState(() {});
+      _loadRemoteDocuments();
     }
   }
 
   // Add a manual refresh method
   void refresh() {
     if (mounted) {
-      setState(() {});
+      _loadRemoteDocuments();
     }
   }
 
@@ -75,7 +92,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final documents = _documentService.documents;
+    final documents = _remoteDocuments;
 
     print('📱 Documents screen building with ${documents.length} documents');
 
@@ -102,12 +119,14 @@ class _DocumentsScreenState extends State<DocumentsScreen>
           IconButton(
             icon: const Icon(Icons.refresh, color: Color(0xFF6B7280)),
             onPressed: () {
-              setState(() {});
+              _loadRemoteDocuments();
             },
           ),
         ],
       ),
-      body: documents.isEmpty
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : documents.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -130,7 +149,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
                   const SizedBox(height: 16),
                   ElevatedButton.icon(
                     onPressed: () {
-                      setState(() {});
+                      _loadRemoteDocuments();
                     },
                     icon: const Icon(Icons.refresh),
                     label: const Text('Refresh'),
@@ -140,7 +159,7 @@ class _DocumentsScreenState extends State<DocumentsScreen>
             )
           : RefreshIndicator(
               onRefresh: () async {
-                setState(() {});
+                await _loadRemoteDocuments();
               },
               child: GridView.builder(
                 padding: const EdgeInsets.all(16),
@@ -214,7 +233,12 @@ class _DocumentGridCard extends StatelessWidget {
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(16),
                     ),
-                    child: document.images.isNotEmpty
+                    child: document.imageUrls.isNotEmpty
+                        ? Image.network(
+                            document.imageUrls.first,
+                            fit: BoxFit.cover,
+                          )
+                        : document.images.isNotEmpty
                         ? Image.file(document.images.first, fit: BoxFit.cover)
                         : Container(
                             color: const Color(0xFFF9FAFB),
@@ -298,7 +322,7 @@ class _DocumentGridCard extends StatelessWidget {
 
                           // Page count (bottom right)
                           Text(
-                            '${document.images.length} page${document.images.length == 1 ? '' : 's'}',
+                            '${(document.imageUrls.isNotEmpty ? document.imageUrls.length : document.images.length)} page${(document.imageUrls.isNotEmpty ? document.imageUrls.length : document.images.length) == 1 ? '' : 's'}',
                             style: GoogleFonts.inter(
                               fontSize: 12,
                               color: const Color(0xFF6B7280),

@@ -45,6 +45,10 @@ dependencies:
   provider: ^6.1.1
   file_picker: ^8.0.0+1
 
+  # Supabase
+  supabase_flutter: ^2.3.4
+  crypto: ^3.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

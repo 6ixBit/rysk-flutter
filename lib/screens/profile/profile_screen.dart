@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'legal_document_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../services/auth_service.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authService = AuthService();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -64,45 +67,111 @@ class ProfileScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // User Name
-                  Text(
-                    'John Doe',
-                    style: GoogleFonts.inter(
-                      fontSize: 24,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF1F2937),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
+                  // User Name + Email + Member Since (from Supabase)
+                  FutureBuilder(
+                    future: authService.getUserProfile(),
+                    builder: (context, snapshot) {
+                      final profile = snapshot.data;
+                      final user = Supabase.instance.client.auth.currentUser;
+                      final email = user?.email ?? profile?.email ?? '';
+                      final displayName =
+                          (profile?.fullName != null &&
+                              profile!.fullName!.isNotEmpty)
+                          ? profile.fullName!
+                          : (email.isNotEmpty ? email.split('@').first : '');
 
-                  // User Email
-                  Text(
-                    'john.doe@example.com',
-                    style: GoogleFonts.inter(
-                      fontSize: 16,
-                      color: const Color(0xFF6B7280),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                      DateTime? createdAt = profile?.createdAt;
+                      String memberSinceText = '';
+                      if (createdAt != null) {
+                        const months = [
+                          'January',
+                          'February',
+                          'March',
+                          'April',
+                          'May',
+                          'June',
+                          'July',
+                          'August',
+                          'September',
+                          'October',
+                          'November',
+                          'December',
+                        ];
+                        memberSinceText =
+                            'Member since ${months[createdAt.month - 1]} ${createdAt.year}';
+                      }
 
-                  // Member Since
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF3B82F6).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Member since December 2024',
-                      style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xFF3B82F6),
-                      ),
-                    ),
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Column(
+                          children: [
+                            Container(
+                              height: 24,
+                              width: 140,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Container(
+                              height: 18,
+                              width: 180,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                          ],
+                        );
+                      }
+
+                      return Column(
+                        children: [
+                          // Name
+                          Text(
+                            displayName.isEmpty ? 'User' : displayName,
+                            style: GoogleFonts.inter(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF1F2937),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+
+                          // Email
+                          Text(
+                            email,
+                            style: GoogleFonts.inter(
+                              fontSize: 16,
+                              color: const Color(0xFF6B7280),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          // Member Since
+                          if (memberSinceText.isNotEmpty)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF3B82F6).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                memberSinceText,
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: const Color(0xFF3B82F6),
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                 ],
               ),
@@ -380,10 +449,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+  void _showLogoutDialog(BuildContext pageContext) {
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
@@ -399,7 +468,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: GoogleFonts.inter(
@@ -409,10 +478,14 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
+            onPressed: () async {
+              Navigator.pop(dialogContext); // Close dialog
+              try {
+                await AuthService().signOut();
+              } catch (_) {}
+              // Use the page context for navigation to avoid deactivated context
               Navigator.pushNamedAndRemoveUntil(
-                context,
+                pageContext,
                 '/login',
                 (route) => false,
               );
@@ -430,10 +503,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showDeleteAccountDialog(BuildContext context) {
+  void _showDeleteAccountDialog(BuildContext pageContext) {
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
+      context: pageContext,
+      builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
@@ -449,7 +522,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: Text(
               'Cancel',
               style: GoogleFonts.inter(color: const Color(0xFF6B7280)),
@@ -457,9 +530,9 @@ class ProfileScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               // TODO: Implement account deletion
-              ScaffoldMessenger.of(context).showSnackBar(
+              ScaffoldMessenger.of(pageContext).showSnackBar(
                 SnackBar(
                   content: Text(
                     'Account deletion feature coming soon',

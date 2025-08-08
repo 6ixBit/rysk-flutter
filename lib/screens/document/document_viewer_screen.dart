@@ -743,13 +743,20 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
     return Column(
       children: [
         // Image navigation
-        if (widget.document.images.length > 1)
+        if ((widget.document.imageUrls.isNotEmpty
+                ? widget.document.imageUrls.length
+                : widget.document.images.length) >
+            1)
           Container(
             height: 60,
             padding: const EdgeInsets.all(8),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: widget.document.images.length,
+              itemCount:
+                  (widget.document.imageUrls.isNotEmpty
+                          ? widget.document.imageUrls
+                          : widget.document.images)
+                      .length,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
@@ -774,10 +781,15 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
-                      child: Image.file(
-                        widget.document.images[index],
-                        fit: BoxFit.cover,
-                      ),
+                      child: widget.document.imageUrls.isNotEmpty
+                          ? Image.network(
+                              widget.document.imageUrls[index],
+                              fit: BoxFit.cover,
+                            )
+                          : Image.file(
+                              widget.document.images[index],
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                 );
@@ -789,7 +801,11 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
         Expanded(
           child: PageView.builder(
             controller: _imagePageController,
-            itemCount: widget.document.images.length,
+            itemCount:
+                (widget.document.imageUrls.isNotEmpty
+                        ? widget.document.imageUrls
+                        : widget.document.images)
+                    .length,
             onPageChanged: (index) {
               setState(() {
                 _currentImageIndex = index;
@@ -813,10 +829,15 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.file(
-                      widget.document.images[index],
-                      fit: BoxFit.contain,
-                    ),
+                    child: widget.document.imageUrls.isNotEmpty
+                        ? Image.network(
+                            widget.document.imageUrls[index],
+                            fit: BoxFit.contain,
+                          )
+                        : Image.file(
+                            widget.document.images[index],
+                            fit: BoxFit.contain,
+                          ),
                   ),
                 ),
               );
@@ -825,11 +846,15 @@ class _DocumentViewerScreenState extends State<DocumentViewerScreen>
         ),
 
         // Page indicator
-        if (widget.document.images.length > 1)
+        if ((widget.document.imageUrls.isNotEmpty
+                ? widget.document.imageUrls.length
+                : widget.document.images.length) >
+            1)
           Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Page ${_currentImageIndex + 1} of ${widget.document.images.length}',
+              'Page ${_currentImageIndex + 1} of '
+              '${widget.document.imageUrls.isNotEmpty ? widget.document.imageUrls.length : widget.document.images.length}',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),

@@ -66,6 +66,7 @@ class Document {
   final String id;
   final String title;
   final List<File> images;
+  final List<String> imageUrls; // For images stored in Supabase storage
   final DateTime uploadDate;
   final DocumentStatus status;
   final DocumentAnalysis? analysis;
@@ -79,12 +80,14 @@ class Document {
     required this.status,
     this.analysis,
     this.errorMessage,
+    this.imageUrls = const [],
   });
 
   Document copyWith({
     String? id,
     String? title,
     List<File>? images,
+    List<String>? imageUrls,
     DateTime? uploadDate,
     DocumentStatus? status,
     DocumentAnalysis? analysis,
@@ -94,6 +97,7 @@ class Document {
       id: id ?? this.id,
       title: title ?? this.title,
       images: images ?? this.images,
+      imageUrls: imageUrls ?? this.imageUrls,
       uploadDate: uploadDate ?? this.uploadDate,
       status: status ?? this.status,
       analysis: analysis ?? this.analysis,
